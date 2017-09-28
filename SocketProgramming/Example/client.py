@@ -100,9 +100,9 @@ def allReceived(data):
 bufsize = 16
 # messages to send to server.
 message1 = ['3+12', '1+12/3', '1+1']
-#message2 = ['3+19', '1+12/4']
-#message3 = ['32+323', '32/3+387', '644/32+645*32', '656/22+237-23/4+32*94', '4*3+26', '493*10+35-67']
-messages = [message1]
+message2 = ['3+19', '1+12/4']
+message3 = ['32+323', '32/3+387', '644/32+645*32', '656/22+237-23/4+32*94', '4*3+26', '493*10+35-67']
+messages = [message1, message2, message3]
 
 for message in messages:
     request = createRequest(message)

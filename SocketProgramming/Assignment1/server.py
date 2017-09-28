@@ -35,8 +35,8 @@ def handler(conn, addr):
         if allReceived(received):
             print('Server received: ', repr(received), 'from', addr)
             response = answerRequest(received)
-            #print('Server respond: ', repr(response), '\n')
-            conn.sendall(str.encode('Echo ==> ') + data)
+            print('Server respond: ', repr(response), '\n')
+            conn.sendall(response)
             received = b""
     conn.close()
 
@@ -69,34 +69,39 @@ def answerRequest(request):
     while numOfEquations > 0:
         lenOfEquation = socket.ntohs(struct.unpack('h', request[pos: pos+2])[0])
         pos += 2
-        equation = request[pos: pos+lenOfEquation]
+        equation = request[pos: pos + lenOfEquation]
         pos += lenOfEquation
         print("equation ", equation)
-        tmp = caculate(equation)
-        #result = result + len(tmp) + tmp
+        answer = caculate(equation) # object of int has no length
+        str_answer = str(answer)
+        print("str_answer", str_answer)
+        result += struct.pack('h', socket.htons(len(str_answer)))
+        result += str_answer.encode()
         numOfEquations -= 1
+    print("result", result)
     return result
 
 # Take a string expression and return the answer(int) of the given string
 def caculate(bytes):
     # 1 + 12 / 3
     str = re.sub(r'\d+', " \g<0> ", bytes.decode())
-    oper = {'+': operator.add, '-': operator.sub, '*': operator.mul, '/': operator.floordiv}
+    op = {'+': operator.add, '-': operator.sub, '*': operator.mul, '/': operator.floordiv}
     expressions = str.split()
     i = d = tmp = 0
-    func = oper['+']
+    pfunc = op['+'] # previous func
     while i < len(expressions):
         exp = expressions[i]
         if exp in '+-':
-            tmp = func(tmp, d) # tmp = func(0,1) = 1
-            func = exp # +
+            tmp = pfunc(tmp, d) # tmp = pfunc(0,1) = 1
+            pfunc = op[exp] # +
         elif exp in '*/':
+            cfunc = op[exp] # current func
+            d = cfunc(d, int(expressions[i + 1])) # priority: 12/3
             i += 1
-            tmp += oper[exp](d, expressions[i]) # 1 + 4
         else:
             d = int(exp) # 1 12
         i += 1
-    return func(tmp, d)
+    return pfunc(tmp, d)
 
 while True:
     conn, addr = s.accept()
