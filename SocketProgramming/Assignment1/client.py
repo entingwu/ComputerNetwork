@@ -23,10 +23,10 @@ messages = [message1, message2]
 # 2 4 '3+12' 6 '1+12/3'
 def createRequest(messages):
     numOfEquations = len(messages)
-    result = struct.pack('h', socket.htons(numOfEquations))
+    result = struct.pack('!h', numOfEquations)
     for msg in messages:
         lenOfEquations = len(msg)
-        result += struct.pack('h', socket.htons(lenOfEquations))
+        result += struct.pack('!h', lenOfEquations)
         result += msg.encode()
     return result
 
@@ -34,10 +34,10 @@ def createRequest(messages):
 # the answers to the sent equations.
 def decodeResponse(response):
     results = []
-    numOfResponses = socket.ntohs(struct.unpack('h', response[:2])[0])
+    numOfResponses = struct.unpack('!h', response[:2])[0]
     pos = 2
     while numOfResponses > 0:
-        lenOfAnswer = socket.ntohs(struct.unpack('h', response[pos: pos+2])[0])
+        lenOfAnswer = struct.unpack('!h', response[pos: pos+2])[0]
         pos += 2
         answer = response[pos: pos + lenOfAnswer]
         pos += lenOfAnswer
@@ -47,12 +47,12 @@ def decodeResponse(response):
 
 # Take a string and return True if the string is one whole response from server otherwise return False.
 def allReceived(data):
-    numOfResponses = socket.ntohs(struct.unpack('h', data[:2])[0])
+    numOfResponses = struct.unpack('!h', data[:2])[0]
     pos = 2
     while numOfResponses > 0:
         if pos + 2 >= len(data):
             return False
-        lenOfAnswer = socket.ntohs(struct.unpack('h', data[pos: pos+2])[0])
+        lenOfAnswer = struct.unpack('!h', data[pos: pos+2])[0]
         pos += 2 + lenOfAnswer
         numOfResponses -= 1
     if pos == len(data):

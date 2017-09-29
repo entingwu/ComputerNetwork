@@ -44,14 +44,14 @@ def handler(conn, addr):
 def allReceived(request):
     # get first two bytes, (2,):
     # struct.unpack('h', request[:2])[0]
-    numOfEquations = socket.ntohs(struct.unpack('h', request[:2])[0])
+    numOfEquations = struct.unpack('!h', request[:2])[0]
     pos = 2
 
     while numOfEquations > 0:
         if pos + 2 >= len(request):
             return False
         # get next 2 bytes: request[pos: pos+2]
-        lenOfEquation = socket.ntohs(struct.unpack('h', request[pos: pos+2])[0])
+        lenOfEquation = struct.unpack('!h', request[pos: pos+2])[0]
         pos += 2 + lenOfEquation
         # pos is at next exp
         numOfEquations -= 1
@@ -62,12 +62,12 @@ def allReceived(request):
 # Take one formatted request and return a formatted response with answers
 # 3 2 "15" 1 "5" 1 "2"
 def answerRequest(request):
-    numOfEquations = socket.ntohs(struct.unpack('h', request[:2])[0])
+    numOfEquations = struct.unpack('!h', request[:2])[0]
     result = request[:2] #byte
     pos = 2
 
     while numOfEquations > 0:
-        lenOfEquation = socket.ntohs(struct.unpack('h', request[pos: pos+2])[0])
+        lenOfEquation = struct.unpack('!h', request[pos: pos+2])[0]
         pos += 2
         equation = request[pos: pos + lenOfEquation]
         pos += lenOfEquation
@@ -75,7 +75,7 @@ def answerRequest(request):
         answer = caculate(equation) # object of int has no length
         str_answer = str(answer)
         print("str_answer", str_answer)
-        result += struct.pack('h', socket.htons(len(str_answer)))
+        result += struct.pack('!h', len(str_answer))
         result += str_answer.encode()
         numOfEquations -= 1
     print("result", result)
