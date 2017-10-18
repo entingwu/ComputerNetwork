@@ -8,7 +8,7 @@ from ProxyServer.myUtil import *
 # Get host name, IP address, and port number.
 host_name = socket.gethostname()
 host_ip = socket.gethostbyname(host_name)
-host_port = 8181
+host_port = 8585
 
 # Make a TCP socket object.
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -28,11 +28,6 @@ bufsize = 1024
 
 
 def handler(conn):
-    raw_data = ""
-    #	while True:
-    #		data = conn.recv(bufsize)
-    #		if not data: break
-    #		raw_data += data
     raw_data = conn.recv(bufsize)
     request_info = getRequestInfo(getRequestLine(raw_data))
     method, host, path, protocal = request_info
